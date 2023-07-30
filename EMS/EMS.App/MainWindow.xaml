@@ -1,0 +1,29 @@
+﻿<Window x:Class="EMS.App.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:EMS.App" Background="#333"
+        mc:Ignorable="d" WindowStyle="None" MouseLeftButtonDown="Window_MouseLeftButtonDown"
+        Title="MainWindow" Height="450" Width="800">
+    <WindowChrome.WindowChrome>
+        <WindowChrome GlassFrameThickness="0" CornerRadius="0" CaptionHeight="0"/>
+    </WindowChrome.WindowChrome>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button x:Name="btnMinimize" Content="─" Height="30" Width="30"
+                    BorderBrush="Transparent" Background="Transparent"
+                    Click="btnMinimize_Click" Foreground="#fff"/>
+            <Button x:Name="btnMaximize" Content="□" Height="30" Width="30"
+                    BorderBrush="Transparent" Background="Transparent"
+                    Click="btnMaximize_Click" Foreground="#fff"/>
+            <Button x:Name="btnClose" Content="X" Height="30" Width="30"
+                    BorderBrush="Transparent" Background="Transparent"
+                    Click="btnClose_Click" Foreground="DarkRed"/>
+        </StackPanel>
+    </Grid>
+</Window>
