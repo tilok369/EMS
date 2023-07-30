@@ -15,14 +15,11 @@
             <RowDefinition/>
         </Grid.RowDefinitions>
         <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button x:Name="btnMinimize" Content="─" Height="30" Width="30"
-                    BorderBrush="Transparent" Background="Transparent"
+            <Button x:Name="btnMinimize" Content="─" Style="{StaticResource WindowButton}"
                     Click="btnMinimize_Click" Foreground="#fff"/>
-            <Button x:Name="btnMaximize" Content="□" Height="30" Width="30"
-                    BorderBrush="Transparent" Background="Transparent"
+            <Button x:Name="btnMaximize" Content="□"  Style="{StaticResource WindowButton}"
                     Click="btnMaximize_Click" Foreground="#fff"/>
-            <Button x:Name="btnClose" Content="X" Height="30" Width="30"
-                    BorderBrush="Transparent" Background="Transparent"
+            <Button x:Name="btnClose" Content="X"  Style="{StaticResource WindowButton}"
                     Click="btnClose_Click" Foreground="DarkRed"/>
         </StackPanel>
     </Grid>
