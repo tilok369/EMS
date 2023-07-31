@@ -10,6 +10,14 @@ public class MainWindowViewModel: ViewModelBase
     public ObservableCollection<string> Statuses { get; set; }
     public ObservableCollection<string> Genders { get; set; }
 
+
+    public RelayCommand EditCommand => new RelayCommand(execute => EditEmployee());
+    public RelayCommand SaveCommand => new RelayCommand(execute => SaveEmployee());
+    public RelayCommand DeleteCommand => new RelayCommand(
+        execute => DeleteEmployee(), 
+        canExecute => SelectedEmployee != null);
+    public RelayCommand ClearCommand => new RelayCommand(execute => ClearEmployee());
+
     public MainWindowViewModel()
     {
         Statuses = new ObservableCollection<string>();
@@ -29,7 +37,7 @@ public class MainWindowViewModel: ViewModelBase
         });
         Employees.Add(new Employee
         {
-            id = 100,
+            id = 101,
             name = "Sheema",
             email = "sheema@gmail.com",
             gender = "female",
@@ -47,6 +55,33 @@ public class MainWindowViewModel: ViewModelBase
             selectedEmployee = value; 
             OnPropertyChanged();
         }
+    }
+
+    private void SaveEmployee()
+    {
+        Employees.Add(new Employee
+        {
+            id = 102,
+            name = "Another Person",
+            email = "another@gmail.com",
+            gender = "female",
+            status = "active"
+        });
+    }
+
+    private void DeleteEmployee()
+    {
+        Employees.Remove(SelectedEmployee);
+    }
+
+    private void ClearEmployee()
+    {
+        SelectedEmployee = null;
+    }
+
+    private void EditEmployee()
+    {
+        
     }
 
 }
