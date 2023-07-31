@@ -1,5 +1,6 @@
 ﻿using EMS.App.MVVM;
 using EMS.Model;
+using System;
 using System.Collections.ObjectModel;
 
 namespace EMS.App.ViewModel;
@@ -43,6 +44,7 @@ public class MainWindowViewModel: ViewModelBase
             gender = "female",
             status = "active"
         });
+        SavableEmployee = new Employee();
     }
 
     private Employee selectedEmployee;
@@ -57,31 +59,53 @@ public class MainWindowViewModel: ViewModelBase
         }
     }
 
+    private Employee savableEmployee;
+
+    public Employee SavableEmployee
+    {
+        get { return savableEmployee; }
+        set 
+        { 
+            savableEmployee = value;
+            OnPropertyChanged();
+        }
+    }
+
+
     private void SaveEmployee()
     {
+        if(SavableEmployee == null || string.IsNullOrEmpty(SavableEmployee.name))
+            return;
         Employees.Add(new Employee
         {
-            id = 102,
-            name = "Another Person",
-            email = "another@gmail.com",
-            gender = "female",
-            status = "active"
+            id = new Random(1000).NextInt64(),
+            name = SavableEmployee.name,
+            email = SavableEmployee.email,
+            gender = SavableEmployee.gender,
+            status = SavableEmployee.status
         });
     }
 
     private void DeleteEmployee()
     {
-        Employees.Remove(SelectedEmployee);
+        Employees.Remove(SavableEmployee);
     }
 
     private void ClearEmployee()
     {
-        SelectedEmployee = null;
+        SavableEmployee = new Employee();
     }
 
     private void EditEmployee()
     {
-        
+        SavableEmployee = new Employee
+        {
+            id = SelectedEmployee.id,
+            email = SelectedEmployee.email,
+            gender = SelectedEmployee.gender,
+            name = SelectedEmployee.name,
+            status = SelectedEmployee.status
+        };
     }
 
 }
