@@ -30,23 +30,32 @@
                 <ColumnDefinition Width="3*"/>
             </Grid.ColumnDefinitions>
 
-            <DataGrid Grid.Column="0" CanUserAddRows="False" CanUserDeleteRows="False" Background="#777">
+            <DataGrid Grid.Column="0" 
+                      CanUserAddRows="False" 
+                      CanUserDeleteRows="False"
+                      AutoGenerateColumns="false"
+                      Background="#777"
+                      ItemsSource="{Binding Employees}"
+                      SelectedItem="{Binding SelectedEmployee}">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="ID" Binding="{Binding id}" Width="1*"/>
+                    <DataGridTextColumn Header="Name" Binding="{Binding name}" Width="3*"/>
+                    <DataGridTextColumn Header="Email" Binding="{Binding email}" Width="3*"/>
+                    <DataGridTextColumn Header="Gender" Binding="{Binding gender}" Width="2*"/>
+                    <DataGridTextColumn Header="Status" Binding="{Binding status}" Width="1*"/>
+                </DataGrid.Columns>
             </DataGrid>
 
             <StackPanel Grid.Column="1">
                 <Label Content="Name" FontSize="14" Foreground="#fff"/>
-                <TextBox Margin="5 0 5 0"/>
+                <TextBox Margin="5 0 5 0" Text="{Binding SelectedEmployee.name, UpdateSourceTrigger=PropertyChanged}"/>
                 <Label Content="Email" FontSize="14" Foreground="#fff"/>
-                <TextBox Margin="5 0 5 0"/>
+                <TextBox Margin="5 0 5 0" Text="{Binding SelectedEmployee.email, UpdateSourceTrigger=PropertyChanged}"/>
                 <Label Content="Gender" FontSize="14" Foreground="#fff"/>
-                <ComboBox Margin="5 0 5 0">
-                    <ComboBoxItem Name="male">Male</ComboBoxItem>
-                    <ComboBoxItem Name="female">Female</ComboBoxItem>
+                <ComboBox Margin="5 0 5 0" ItemsSource="{Binding Genders}" SelectedItem="{Binding SelectedEmployee.gender, UpdateSourceTrigger=PropertyChanged}">
                 </ComboBox>
                 <Label Content="Status" FontSize="14" Foreground="#fff"/>
-                <ComboBox Margin="5 0 5 0">
-                    <ComboBoxItem Name="active">Active</ComboBoxItem>
-                    <ComboBoxItem Name="inactive">Inactive</ComboBoxItem>
+                <ComboBox Margin="5 0 5 0" ItemsSource="{Binding Statuses}" SelectedItem="{Binding SelectedEmployee.status, UpdateSourceTrigger=PropertyChanged}">
                 </ComboBox>
 
                     <Grid Margin="0 10 0 0">

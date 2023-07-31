@@ -7,4 +7,8 @@
     <UseWPF>true</UseWPF>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\EMS.Model\EMS.Model.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EMS.App.ViewModel;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,6 +24,8 @@ namespace EMS.App
         public MainWindow()
         {
             InitializeComponent();
+            var vm = new MainWindowViewModel();
+            DataContext = vm;
         }
 
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
