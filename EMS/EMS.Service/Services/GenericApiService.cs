@@ -33,13 +33,13 @@ public class GenericApiService<T> : IGenericApiService<T> where T: class
         }
     }
 
-    public async Task<T> GetAsync(string queryString)
+    public async Task<T> GetAsync(long id)
     {
         using (var httpClient = new HttpClient())
         {
             var request = new HttpRequestMessage
             {
-                RequestUri = new Uri($"{_rootUrl}{queryString}"),
+                RequestUri = new Uri($"{_rootUrl}{id}"),
                 Method = HttpMethod.Get,
             };
             var response = await httpClient.SendAsync(request);

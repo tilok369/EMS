@@ -94,6 +94,15 @@ public class MainWindowViewModel : ViewModelBase
     private async Task LoadEmployees(Employee newEmployee = null, int size = 20)
     {
         Employees.Clear();
+        if (newEmployee != null)
+            Employees.Add(new Employee
+            {
+                id = newEmployee.id,
+                name = newEmployee.name,
+                email = newEmployee.email,
+                gender = newEmployee.gender,
+                status = newEmployee.status,
+            });
         var employees = await _employeeManagementService.GetAllAsync($"?page=1&per_page={size}");
         foreach (var employee in employees)
         {
@@ -106,15 +115,6 @@ public class MainWindowViewModel : ViewModelBase
                 status = employee.status,
             });
         }
-        if(newEmployee != null)
-            Employees.Add(new Employee
-            {
-                id = newEmployee.id,
-                name = newEmployee.name,
-                email = newEmployee.email,
-                gender = newEmployee.gender,
-                status = newEmployee.status,
-            });
     }
 
     private async Task SaveEmployee()
@@ -122,13 +122,10 @@ public class MainWindowViewModel : ViewModelBase
         if (SavableEmployee == null || string.IsNullOrEmpty(SavableEmployee.name))
             MessageBox.Show("No employee selected for saving!", "Warning!", MessageBoxButton.OK, MessageBoxImage.Warning);
 
-        var result = SavableEmployee.id == 0
-            ? await _employeeManagementService.CreateAsync(SavableEmployee)
-            : await _employeeManagementService.UpdateAsync(SavableEmployee.id, SavableEmployee);
-        if (result.Item1 != null)
-            await LoadEmployees(SavableEmployee.id == 0 ? result.Item1 : null, 20);
-        else
-            MessageBox.Show(FormatMessage(result.Item2), "Error!", MessageBoxButton.OK, MessageBoxImage.Error);
+        if ((SavableEmployee?.id ?? 0) == 0)
+            await AddEmployee();
+        else 
+            await UpdateEmployee();
     }
 
     private async Task DeleteEmployee()
@@ -137,10 +134,11 @@ public class MainWindowViewModel : ViewModelBase
         if (SavableEmployee == null || SavableEmployee.id == 0)
             MessageBox.Show("No employee selected for deletion!", "Warning!", MessageBoxButton.OK, MessageBoxImage.Warning);
 
-        var result = await _employeeManagementService.DeleteAsync(SavableEmployee.id);
+        var result = await _employeeManagementService.DeleteAsync(SavableEmployee?.id ?? 0);
         if (result)
         {
-            var emp = Employees.FirstOrDefault(e => e.id == SavableEmployee.id);
+            MessageBox.Show("Employee deleted!", "Information!", MessageBoxButton.OK, MessageBoxImage.Information);
+            var emp = Employees.FirstOrDefault(e => e.id == (SavableEmployee?.id ?? 0));
             if(emp != null)
                 Employees.Remove(emp);
             ClearEmployee();
@@ -152,6 +150,48 @@ public class MainWindowViewModel : ViewModelBase
     private void ClearEmployee()
     {
         SavableEmployee = new Employee();
+    }
+
+    private async Task AddEmployee()
+    {
+        var result = await _employeeManagementService.CreateAsync(SavableEmployee);
+        if (result.Item1 != null)
+        {
+            MessageBox.Show("Employee created!", "Information!", MessageBoxButton.OK, MessageBoxImage.Information);
+            ClearEmployee();
+            Employees.Add(new Employee
+            {
+                id = result.Item1.id,
+                name = result.Item1.name,
+                email = result.Item1.email,
+                gender = result.Item1.gender,
+                status = result.Item1.status
+            });            
+        }
+            
+        else
+            MessageBox.Show(FormatMessage(result.Item2), "Error!", MessageBoxButton.OK, MessageBoxImage.Error);
+    }
+
+    private async Task UpdateEmployee()
+    {
+        var result = await _employeeManagementService.UpdateAsync(SavableEmployee.id, SavableEmployee);
+        if (result.Item1 != null)
+        {
+            MessageBox.Show("Employee updated!", "Information!", MessageBoxButton.OK, MessageBoxImage.Information);
+            ClearEmployee();
+            var emp = Employees.FirstOrDefault(e => e.id == result.Item1.id);
+            if (emp == null) return;
+
+            emp.name = result.Item1.name;
+            emp.email = result.Item1.email;
+            emp.gender = result.Item1.gender;
+            emp.status = result.Item1.status;
+            
+        }
+
+        else
+            MessageBox.Show(FormatMessage(result.Item2), "Error!", MessageBoxButton.OK, MessageBoxImage.Error);
     }
 
     private async Task EditEmployee()
