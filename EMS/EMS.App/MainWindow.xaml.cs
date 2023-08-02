@@ -41,11 +41,11 @@ namespace EMS.App
             Application.Current.Shutdown();
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private async void Button_Click(object sender, RoutedEventArgs e)
         {
             var employeeManagementService = new EmployeeManagementService("https://gorest.co.in/public/v2/users/", "0bf7fb56e6a27cbcadc402fc2fce8e3aa9ac2b40d4190698eb4e8df9284e2023");
             //employeeManagementService.GetEmployees();
-            var emp = employeeManagementService.GetAllAsync("?page=1&per_page=20").GetAwaiter().GetResult();
+            var emp = await employeeManagementService.GetAllAsync("?page=1&per_page=20");
         }
     }
 }

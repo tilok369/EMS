@@ -1,4 +1,5 @@
-﻿using EMS.Service.Contracts;
+﻿using EMS.Model;
+using EMS.Service.Contracts;
 using Newtonsoft.Json;
 using System.Text;
 
@@ -49,7 +50,7 @@ public class GenericApiService<T> : IGenericApiService<T> where T: class
         }
     }
 
-    public async Task<T> CreateAsync(T entity)
+    public async Task<(T?, IEnumerable<ValidationMessage>?)> CreateAsync(T entity)
     {
         using (var httpClient = new HttpClient())
         {
@@ -63,13 +64,12 @@ public class GenericApiService<T> : IGenericApiService<T> where T: class
 
             var response = await httpClient.SendAsync(request);
             var result = await response.Content.ReadAsStringAsync();
-            var createdEntity = JsonConvert.DeserializeObject<T>(result);
 
-            return createdEntity;
+            return FormulateData(result);
         }
     }
 
-    public async Task<T> UpdateAsync(long id, T entity)
+    public async Task<(T?, IEnumerable<ValidationMessage>?)> UpdateAsync(long id, T entity)
     {
         using (var httpClient = new HttpClient())
         {
@@ -85,11 +85,11 @@ public class GenericApiService<T> : IGenericApiService<T> where T: class
             var result = await response.Content.ReadAsStringAsync();
             var updatedEntity = JsonConvert.DeserializeObject<T>(result);
 
-            return updatedEntity;
+            return FormulateData(result);
         }
     }
 
-    public async Task<T> DeleteAsync(long id)
+    public async Task<bool> DeleteAsync(long id)
     {
         using (var httpClient = new HttpClient())
         {
@@ -102,9 +102,8 @@ public class GenericApiService<T> : IGenericApiService<T> where T: class
 
             var response = await httpClient.SendAsync(request);
             var result = await response.Content.ReadAsStringAsync();
-            var deletedEntity = JsonConvert.DeserializeObject<T>(result);
 
-            return deletedEntity;
+            return string.IsNullOrEmpty(result);
         }
     }
 
@@ -123,6 +122,16 @@ public class GenericApiService<T> : IGenericApiService<T> where T: class
         string json = JsonConvert.SerializeObject(entity);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
         return content;
+    }
+
+    private (T?, IEnumerable<ValidationMessage>? messages) FormulateData(string result)
+    {
+        if (string.IsNullOrEmpty(result))
+            return (null, new List<ValidationMessage> { new ValidationMessage("", "An error occurred!") });
+        if (result.Contains("message"))
+            return (null, JsonConvert.DeserializeObject<IEnumerable<ValidationMessage>>(result));
+
+        return (JsonConvert.DeserializeObject<T>(result), new List<ValidationMessage>());
     }
 
     #endregion

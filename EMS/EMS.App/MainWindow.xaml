@@ -35,7 +35,7 @@
                       CanUserDeleteRows="False"
                       AutoGenerateColumns="false"
                       Background="#777"
-                      ItemsSource="{Binding Employees}"
+                      ItemsSource="{Binding Employees, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                       SelectedItem="{Binding SelectedEmployee}">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="ID" Binding="{Binding id}" Width="1*"/>
