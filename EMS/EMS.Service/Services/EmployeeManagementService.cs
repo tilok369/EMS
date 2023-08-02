@@ -5,15 +5,10 @@ using System.Text;
 
 namespace EMS.Service.Services
 {
-    public class EmployeeManagementService: IEmployeeManagementService
+    public class EmployeeManagementService: GenericApiService<Employee>, IEmployeeManagementService
     {
-        private readonly string _rootUrl;
-        private readonly string _token;
-
-        public EmployeeManagementService(string rootUrl, string token)
+        public EmployeeManagementService(string rootUrl, string token): base(rootUrl, token)
         {
-            _token = token;
-            _rootUrl = rootUrl;
         }
 
         public void GetEmployees()
@@ -22,7 +17,7 @@ namespace EMS.Service.Services
             {
                 var request = new HttpRequestMessage
                 {
-                    RequestUri = new Uri("https://gorest.co.in/public/v2/users?page=1&per_page=20 "),
+                    RequestUri = new Uri("https://gorest.co.in/public/v2/users?page=1&per_page=20"),
                     Method = HttpMethod.Get,
                 };
                 var response = httpClient.SendAsync(request).GetAwaiter().GetResult();
@@ -58,111 +53,6 @@ namespace EMS.Service.Services
                 var employee = JsonConvert.DeserializeObject<Employee>(result);
             }
 
-        }
-
-        public async Task<IEnumerable<Employee>> GetAllAsync(string queryString)
-        {
-            using (var httpClient = new HttpClient())
-            {
-                var request = new HttpRequestMessage
-                {
-                    RequestUri = new Uri($"{_rootUrl}{queryString}"),
-                    Method = HttpMethod.Get,
-                };
-                var response = await httpClient.SendAsync(request);
-                var result = await response.Content.ReadAsStringAsync();
-                var employees = JsonConvert.DeserializeObject<IEnumerable<Employee>>(result);
-
-                return employees;
-            }
-        }
-
-        public async Task<Employee> GetAsync(string queryString)
-        {
-            using (var httpClient = new HttpClient())
-            {
-                var request = new HttpRequestMessage
-                {
-                    RequestUri = new Uri($"{_rootUrl}{queryString}"),
-                    Method = HttpMethod.Get,
-                };
-                var response = await httpClient.SendAsync(request);
-                var result = await response.Content.ReadAsStringAsync();
-                var employee = JsonConvert.DeserializeObject<Employee>(result);
-
-                return employee;
-            }
-        }
-
-        public async Task<Employee> CreateAsync(Employee entity)
-        {
-            using (var httpClient = new HttpClient())
-            {
-                var request = new HttpRequestMessage
-                {
-                    RequestUri = new Uri(_rootUrl),
-                    Method = HttpMethod.Post,
-                    Content = ConstructContent(entity)
-                };
-                ConstructAuthHeader(request);
-
-                var response = await httpClient.SendAsync(request);
-                var result = await response.Content.ReadAsStringAsync();
-                var employee = JsonConvert.DeserializeObject<Employee>(result);
-
-                return employee;
-            }
-        }      
-
-        public async Task<Employee> UpdateAsync(long id, Employee entity)
-        {
-            using (var httpClient = new HttpClient())
-            {
-                var request = new HttpRequestMessage
-                {
-                    RequestUri = new Uri($"{_rootUrl}{id}"),
-                    Method = HttpMethod.Put,
-                    Content = ConstructContent(entity)
-                };
-                ConstructAuthHeader(request);
-
-                var response = await httpClient.SendAsync(request);
-                var result = await response.Content.ReadAsStringAsync();
-                var employee = JsonConvert.DeserializeObject<Employee>(result);
-
-                return employee;
-            }
-        }
-
-        public async Task<Employee> DeleteAsync(long id)
-        {
-            using (var httpClient = new HttpClient())
-            {
-                var request = new HttpRequestMessage
-                {
-                    RequestUri = new Uri($"{_rootUrl}{id}"),
-                    Method = HttpMethod.Delete
-                };
-                ConstructAuthHeader(request);
-
-                var response = await httpClient.SendAsync(request);
-                var result = await response.Content.ReadAsStringAsync();
-                var employee = JsonConvert.DeserializeObject<Employee>(result);
-
-                return employee;
-            }
-        }
-
-        private void ConstructAuthHeader(HttpRequestMessage request)
-        {
-            request.Headers.Add("Authorization", $"Bearer {_token}");
-        }
-
-        private static StringContent ConstructContent(Employee entity)
-        {
-            string json = JsonConvert.SerializeObject(entity);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
-            return content;
         }
     }
 }

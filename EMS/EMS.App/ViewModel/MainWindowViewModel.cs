@@ -1,5 +1,7 @@
 ﻿using EMS.App.MVVM;
 using EMS.Model;
+using EMS.Service.Contracts;
+using EMS.Service.Services;
 using System;
 using System.Collections.ObjectModel;
 
@@ -7,6 +9,8 @@ namespace EMS.App.ViewModel;
 
 public class MainWindowViewModel: ViewModelBase
 {
+    private readonly IEmployeeManagementService employeeManagementService;
+
     public ObservableCollection<Employee> Employees { get; set; }
     public ObservableCollection<string> Statuses { get; set; }
     public ObservableCollection<string> Genders { get; set; }
@@ -21,6 +25,7 @@ public class MainWindowViewModel: ViewModelBase
 
     public MainWindowViewModel()
     {
+        employeeManagementService = new EmployeeManagementService("https://gorest.co.in/public/v2/users", "0bf7fb56e6a27cbcadc402fc2fce8e3aa9ac2b40d4190698eb4e8df9284e2023");
         Statuses = new ObservableCollection<string>();
         Statuses.Add("active");
         Statuses.Add("inactive");
@@ -28,6 +33,7 @@ public class MainWindowViewModel: ViewModelBase
         Genders.Add("male");
         Genders.Add("female");
         Employees = new ObservableCollection<Employee>();
+        //LoadEmployees();
         Employees.Add(new Employee
         {
             id = 100,
@@ -71,6 +77,21 @@ public class MainWindowViewModel: ViewModelBase
         }
     }
 
+    private void LoadEmployees()
+    {
+        var employees = employeeManagementService.GetAllAsync("").GetAwaiter().GetResult();
+        foreach (var employee in employees)
+        {
+            Employees.Add(new Employee
+            {
+                id = employee.id,
+                name = employee.name,
+                email = employee.email,
+                gender = employee.gender,
+                status = employee.status,
+            });
+        }
+    }
 
     private void SaveEmployee()
     {
