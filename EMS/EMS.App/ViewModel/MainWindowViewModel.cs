@@ -28,10 +28,19 @@ public class MainWindowViewModel : ViewModelBase
         async (execute) => await DeleteEmployee(),
         canExecute => SelectedEmployee != null);
     public RelayCommand ClearCommand => new RelayCommand(execute => ClearEmployee());
+    public RelayCommand PreviousPageCommand => new RelayCommand(
+        async (execute) => await GetPreviousPage(),
+        canExecute => PageNumber > 1);
+    public RelayCommand NextPageCommand => new RelayCommand(async (execute) => await GetNextPage());
+    public RelayCommand SearchCommand => new RelayCommand(
+        async (execute) => SearchEmployees(),
+        canExecute => !string.IsNullOrEmpty(SearchTerm));
 
-    public MainWindowViewModel()
+    public MainWindowViewModel(IEmployeeManagementService employeeManagementService)
     {
-        _employeeManagementService = new EmployeeManagementService("https://gorest.co.in/public/v2/users/", "0bf7fb56e6a27cbcadc402fc2fce8e3aa9ac2b40d4190698eb4e8df9284e2023");
+        PageNumber = 1;      
+        //_employeeManagementService = new EmployeeManagementService("https://gorest.co.in/public/v2/users/", "0bf7fb56e6a27cbcadc402fc2fce8e3aa9ac2b40d4190698eb4e8df9284e2023");
+        _employeeManagementService = employeeManagementService;
         Statuses = new ObservableCollection<string>();
         Statuses.Add("active");
         Statuses.Add("inactive");
@@ -39,25 +48,7 @@ public class MainWindowViewModel : ViewModelBase
         Genders.Add("male");
         Genders.Add("female");
         Employees = new ObservableCollection<Employee>();
-        //_initilize = new Lazy<Task>(() => LoadEmployees(null));
         Initialize();
-        //LoadEmployees();
-        //Employees.Add(new Employee
-        //{
-        //    id = 100,
-        //    name = "Tanjeer",
-        //    email = "tanjeer@gmail.com",
-        //    gender = "male",
-        //    status = "active"
-        //});
-        //Employees.Add(new Employee
-        //{
-        //    id = 101,
-        //    name = "Sheema",
-        //    email = "sheema@gmail.com",
-        //    gender = "female",
-        //    status = "active"
-        //});
         SavableEmployee = new Employee();
     }
 
@@ -85,14 +76,67 @@ public class MainWindowViewModel : ViewModelBase
         }
     }
 
+    private int pageNumber;
+
+    public int PageNumber
+    {
+        get { return pageNumber; }
+        set 
+        { 
+            pageNumber = value;
+            OnPropertyChanged();
+        }
+    }
+
+    private string pageInfo;
+
+    public string PageInfo
+    {
+        get { return pageInfo; }
+        set 
+        { 
+            pageInfo = value;
+            OnPropertyChanged();
+        }
+    }
+
+    private bool isLoading;
+
+    public bool IsLoading
+    {
+        get { return isLoading; }
+        set 
+        { 
+            isLoading = value;
+            OnPropertyChanged();
+        }
+    }
+
+    private string searchTerm;
+
+    public string SearchTerm
+    {
+        get { return searchTerm; }
+        set 
+        { 
+            searchTerm = value;
+            OnPropertyChanged();
+        }
+    }
+
+
+
+
+
     private async void Initialize()
     {
         //await _initilize.Value;
         await LoadEmployees();
     }
 
-    private async Task LoadEmployees(Employee newEmployee = null, int size = 20)
+    private async Task LoadEmployees(Employee newEmployee = null)
     {
+        IsLoading = true;
         Employees.Clear();
         if (newEmployee != null)
             Employees.Add(new Employee
@@ -103,7 +147,7 @@ public class MainWindowViewModel : ViewModelBase
                 gender = newEmployee.gender,
                 status = newEmployee.status,
             });
-        var employees = await _employeeManagementService.GetAllAsync($"?page=1&per_page={size}");
+        var employees = await _employeeManagementService.GetAllAsync($"?page={PageNumber}&per_page=20");
         foreach (var employee in employees)
         {
             Employees.Add(new Employee
@@ -115,6 +159,40 @@ public class MainWindowViewModel : ViewModelBase
                 status = employee.status,
             });
         }
+        IsLoading = false;
+        PageInfo = ChangePageInfo();
+    }
+
+    private async Task SearchEmployees()
+    {
+        IsLoading = true;
+        Employees.Clear();
+        var employees = await _employeeManagementService.GetAllAsync($"?name={searchTerm}");
+        foreach (var employee in employees)
+        {
+            Employees.Add(new Employee
+            {
+                id = employee.id,
+                name = employee.name,
+                email = employee.email,
+                gender = employee.gender,
+                status = employee.status,
+            });
+        }
+        employees = await _employeeManagementService.GetAllAsync($"?email={searchTerm}");
+        foreach (var employee in employees)
+        {
+            Employees.Add(new Employee
+            {
+                id = employee.id,
+                name = employee.name,
+                email = employee.email,
+                gender = employee.gender,
+                status = employee.status,
+            });
+        }
+        IsLoading = false;
+        PageInfo = ChangePageInfo();
     }
 
     private async Task SaveEmployee()
@@ -150,6 +228,7 @@ public class MainWindowViewModel : ViewModelBase
     private void ClearEmployee()
     {
         SavableEmployee = new Employee();
+        SearchTerm = string.Empty;
     }
 
     private async Task AddEmployee()
@@ -183,10 +262,8 @@ public class MainWindowViewModel : ViewModelBase
             var emp = Employees.FirstOrDefault(e => e.id == result.Item1.id);
             if (emp == null) return;
 
-            emp.name = result.Item1.name;
-            emp.email = result.Item1.email;
-            emp.gender = result.Item1.gender;
-            emp.status = result.Item1.status;
+            Employees.Remove(emp);
+            Employees.Add(result.Item1);
             
         }
 
@@ -204,6 +281,25 @@ public class MainWindowViewModel : ViewModelBase
             name = SelectedEmployee.name,
             status = SelectedEmployee.status
         };
+    }
+
+    private async Task GetPreviousPage()
+    {
+        PageNumber--;        
+        await LoadEmployees();
+        PageInfo = ChangePageInfo();
+    }
+
+    private async Task GetNextPage()
+    {
+        PageNumber++;        
+        await LoadEmployees();
+        PageInfo = ChangePageInfo();
+    }
+
+    private string ChangePageInfo()
+    {
+        return $"Showing {Employees.Count} records of page #{PageNumber}";
     }
 
     private string FormatMessage(IEnumerable<ValidationMessage> messages)

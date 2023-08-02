@@ -1,4 +1,5 @@
 ﻿using EMS.App.ViewModel;
+using EMS.Service.Contracts;
 using EMS.Service.Services;
 using System.Windows;
 using System.Windows.Input;
@@ -10,10 +11,10 @@ namespace EMS.App
     /// </summary>
     public partial class MainWindow : Window
     {
-        public MainWindow()
+        public MainWindow(IEmployeeManagementService employeeManagementService)
         {
             InitializeComponent();
-            var vm = new MainWindowViewModel();
+            var vm = new MainWindowViewModel(employeeManagementService);
             DataContext = vm;
         }
 
@@ -39,13 +40,6 @@ namespace EMS.App
         {
             Close();
             Application.Current.Shutdown();
-        }
-
-        private async void Button_Click(object sender, RoutedEventArgs e)
-        {
-            var employeeManagementService = new EmployeeManagementService("https://gorest.co.in/public/v2/users/", "0bf7fb56e6a27cbcadc402fc2fce8e3aa9ac2b40d4190698eb4e8df9284e2023");
-            //employeeManagementService.GetEmployees();
-            var emp = await employeeManagementService.GetAllAsync("?page=1&per_page=20");
         }
     }
 }

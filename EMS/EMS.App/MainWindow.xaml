@@ -3,12 +3,16 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:EMS.App" Background="#333"
+        xmlns:local="clr-namespace:EMS.App" xmlns:converters="clr-namespace:EMS.App.Converters" xmlns:loadingspinnercontrol="clr-namespace:LoadingSpinnerControl;assembly=LoadingSpinnerControl" Background="#333"
         mc:Ignorable="d" WindowStyle="None" MouseLeftButtonDown="Window_MouseLeftButtonDown"
-        Title="MainWindow" Height="500" Width="800">
+        Title="MainWindow" Height="520" Width="800"
+        WindowStartupLocation="CenterScreen">
     <WindowChrome.WindowChrome>
         <WindowChrome GlassFrameThickness="0" CornerRadius="0" CaptionHeight="0"/>
     </WindowChrome.WindowChrome>
+    <Window.Resources>
+        <converters:InverseVisibilityConverter x:Key="InverseVisibilityConverter"/>
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="30"/>
@@ -29,12 +33,17 @@
                 <ColumnDefinition Width="7*"/>
                 <ColumnDefinition Width="3*"/>
             </Grid.ColumnDefinitions>
-
-            <DataGrid Grid.Column="0" 
+            <loadingspinnercontrol:LoadingSpinner 
+                IsLoading="{Binding IsLoading}"
+                Thickness="3"
+                Diameter="70"
+                Color="#000033"/>
+            <DataGrid Grid.Column="0"
                       CanUserAddRows="False" 
                       CanUserDeleteRows="False"
                       AutoGenerateColumns="false"
                       Background="#777"
+                      Visibility="{Binding IsLoading, Converter={StaticResource InverseVisibilityConverter}}"
                       ItemsSource="{Binding Employees, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                       SelectedItem="{Binding SelectedEmployee}">
                 <DataGrid.Columns>
@@ -52,8 +61,24 @@
                     </DataGridTemplateColumn>
                 </DataGrid.Columns>
             </DataGrid>
-
             <StackPanel Grid.Column="1">
+                <StackPanel Orientation="Horizontal">
+                    <Button Content="&lt;" Width="30" HorizontalAlignment="Left" 
+                            ToolTip="Previous Page"
+                            Command="{Binding PreviousPageCommand}"/>
+                    <Button Content="&gt;" Width="30" HorizontalAlignment="Left" 
+                            ToolTip="Next Page"
+                            Command="{Binding NextPageCommand}"/>
+                    <Label Content="{Binding PageInfo}" Foreground="#ccffff" FontStyle="Italic"></Label>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBox Width="155" HorizontalAlignment="Left" 
+                             Margin="5 5 0 0"
+                             Text="{Binding SearchTerm, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                    <Button Content="Search" Width="70" Margin="5 5 0 0" 
+                            HorizontalAlignment="Right"
+                            Command="{Binding SearchCommand}"/>
+                </StackPanel>
                 <Label Content="Name" FontSize="14" Foreground="#fff"/>
                 <TextBox Margin="5 0 5 0" Text="{Binding SavableEmployee.name, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
                 <Label Content="Email" FontSize="14" Foreground="#fff"/>
@@ -64,8 +89,7 @@
                 <Label Content="Status" FontSize="14" Foreground="#fff"/>
                 <ComboBox Margin="5 0 5 0" ItemsSource="{Binding Statuses}" SelectedItem="{Binding SavableEmployee.status, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
                 </ComboBox>
-                <Button Content="Test" Margin="5 10 0 0" Click="Button_Click"/>
-                    <Grid Margin="0 10 0 0">
+                <Grid Margin="0 10 0 0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
                         <ColumnDefinition/>
