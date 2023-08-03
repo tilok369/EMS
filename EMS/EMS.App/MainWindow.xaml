@@ -37,7 +37,7 @@
                 IsLoading="{Binding IsLoading}"
                 Thickness="3"
                 Diameter="70"
-                Color="#000033"/>
+                Color="#fff"/>
             <DataGrid Grid.Column="0"
                       CanUserAddRows="False" 
                       CanUserDeleteRows="False"

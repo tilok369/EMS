@@ -206,6 +206,7 @@ public class MainWindowViewModel : ViewModelBase
             if(emp != null)
                 Employees.Remove(emp);
             ClearEmployee();
+            PageInfo = ChangePageInfo();
         }
         else
             MessageBox.Show("An error occurred while deleting", "Error!", MessageBoxButton.OK, MessageBoxImage.Error);
