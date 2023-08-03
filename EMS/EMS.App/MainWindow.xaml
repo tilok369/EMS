@@ -79,14 +79,14 @@
                             HorizontalAlignment="Right"
                             Command="{Binding SearchCommand}"/>
                 </StackPanel>
-                <Label Content="Name" FontSize="14" Foreground="#fff"/>
+                <Label Content="Name" Style="{StaticResource FormLabel}"/>
                 <TextBox Margin="5 0 5 0" Text="{Binding SavableEmployee.name, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
-                <Label Content="Email" FontSize="14" Foreground="#fff"/>
+                <Label Content="Email" Style="{StaticResource FormLabel}"/>
                 <TextBox Margin="5 0 5 0" Text="{Binding SavableEmployee.email, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
-                <Label Content="Gender" FontSize="14" Foreground="#fff"/>
+                <Label Content="Gender" Style="{StaticResource FormLabel}"/>
                 <ComboBox Margin="5 0 5 0" ItemsSource="{Binding Genders}" SelectedItem="{Binding SavableEmployee.gender, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
                 </ComboBox>
-                <Label Content="Status" FontSize="14" Foreground="#fff"/>
+                <Label Content="Status" Style="{StaticResource FormLabel}"/>
                 <ComboBox Margin="5 0 5 0" ItemsSource="{Binding Statuses}" SelectedItem="{Binding SavableEmployee.status, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
                 </ComboBox>
                 <Grid Margin="0 10 0 0">
@@ -95,11 +95,11 @@
                         <ColumnDefinition/>
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
-                    <Button Grid.Column="0" Content="Save" Width="80" Margin="5 10 0 0" HorizontalAlignment="Left"
+                    <Button Grid.Column="0" Content="Save" Style="{StaticResource FormButton}" HorizontalAlignment="Left"
                             Command="{Binding SaveCommand}"/>
-                    <Button Grid.Column="1" Content="Delete" Width="80" Margin="5 10 0 0" HorizontalAlignment="Right"
+                    <Button Grid.Column="1" Content="Delete" Style="{StaticResource FormButton}" HorizontalAlignment="Right"
                             Command="{Binding DeleteCommand}"/>
-                    <Button Grid.Column="2" Content="Clear" Width="80" Margin="5 10 0 0" HorizontalAlignment="Right"
+                    <Button Grid.Column="2" Content="Clear" Style="{StaticResource FormButton}" HorizontalAlignment="Right"
                             Command="{Binding ClearCommand}"/>
                     
                 </Grid>

@@ -1,4 +1,5 @@
-﻿using EMS.Service.Contracts;
+﻿using EMS.Model.Validators;
+using EMS.Service.Contracts;
 using EMS.Service.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -17,10 +18,10 @@ namespace EMS.App
         {
             AppHost = Host.CreateDefaultBuilder().ConfigureServices((hostContext, services) =>
             {
-                
+                services.AddSingleton<IEmployeeValidator, EmployeeValidator>();   
                 services.AddSingleton(typeof(IGenericApiService<>), typeof(GenericApiService<>));
                 services.AddSingleton<IEmployeeManagementService>(s =>
-                            new EmployeeManagementService(ConfigurationManager.AppSettings["rootUrl"], ConfigurationManager.AppSettings["token"]));
+                            new EmployeeManagementService(ConfigurationManager.AppSettings["rootUrl"]??"", ConfigurationManager.AppSettings["token"]??""));
                 services.AddScoped<MainWindow>();
             }).Build();
         }

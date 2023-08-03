@@ -1,4 +1,5 @@
 ﻿using EMS.App.ViewModel;
+using EMS.Model.Validators;
 using EMS.Service.Contracts;
 using EMS.Service.Services;
 using System.Windows;
@@ -11,10 +12,10 @@ namespace EMS.App
     /// </summary>
     public partial class MainWindow : Window
     {
-        public MainWindow(IEmployeeManagementService employeeManagementService)
+        public MainWindow(IEmployeeValidator employeeValidator, IEmployeeManagementService employeeManagementService)
         {
             InitializeComponent();
-            var vm = new MainWindowViewModel(employeeManagementService);
+            var vm = new MainWindowViewModel(employeeValidator, employeeManagementService);
             DataContext = vm;
         }
 

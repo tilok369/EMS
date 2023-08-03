@@ -7,6 +7,8 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Styles/WindowButtonStyles.xaml" />
+                <ResourceDictionary Source="Styles/FormLabelStyles.xaml" />
+                <ResourceDictionary Source="Styles/FormButtonStyles.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

@@ -9,19 +9,46 @@ using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Linq;
+using EMS.Model.Validators;
 
 namespace EMS.App.ViewModel;
 
 public class MainWindowViewModel : ViewModelBase
 {
+    #region [DI private properties]
+
     private readonly IEmployeeManagementService _employeeManagementService;
-    //private readonly Lazy<Task> _initilize;
+    private readonly IEmployeeValidator _employeeValidator;
+
+    #endregion
+
+    #region [Observale Properties]
 
     public ObservableCollection<Employee> Employees { get; set; }
     public ObservableCollection<string> Statuses { get; set; }
     public ObservableCollection<string> Genders { get; set; }
 
+    #endregion
 
+
+    public MainWindowViewModel(IEmployeeValidator employeeValidator, IEmployeeManagementService employeeManagementService)
+    { 
+        _employeeManagementService = employeeManagementService;
+        _employeeValidator = employeeValidator;    
+        Initialize();
+    }
+
+    private async void Initialize()
+    {
+        Statuses = MainWindowViewModelHelper.InitializeStatues();
+        Genders = MainWindowViewModelHelper.InitializeGenders();
+        ResetPage();
+        Employees = new ObservableCollection<Employee>();
+        SavableEmployee = new Employee();
+        await LoadEmployees();
+    }
+
+    #region [Commands]
     public RelayCommand EditCommand => new RelayCommand(async (execute) => await EditEmployee());
     public RelayCommand SaveCommand => new RelayCommand(async (execute) => await SaveEmployee());
     public RelayCommand DeleteCommand => new RelayCommand(
@@ -33,24 +60,12 @@ public class MainWindowViewModel : ViewModelBase
         canExecute => PageNumber > 1);
     public RelayCommand NextPageCommand => new RelayCommand(async (execute) => await GetNextPage());
     public RelayCommand SearchCommand => new RelayCommand(
-        async (execute) => SearchEmployees(),
+        async (execute) => await SearchEmployees(),
         canExecute => !string.IsNullOrEmpty(SearchTerm));
 
-    public MainWindowViewModel(IEmployeeManagementService employeeManagementService)
-    {
-        PageNumber = 1;      
-        //_employeeManagementService = new EmployeeManagementService("https://gorest.co.in/public/v2/users/", "0bf7fb56e6a27cbcadc402fc2fce8e3aa9ac2b40d4190698eb4e8df9284e2023");
-        _employeeManagementService = employeeManagementService;
-        Statuses = new ObservableCollection<string>();
-        Statuses.Add("active");
-        Statuses.Add("inactive");
-        Genders = new ObservableCollection<string>();
-        Genders.Add("male");
-        Genders.Add("female");
-        Employees = new ObservableCollection<Employee>();
-        Initialize();
-        SavableEmployee = new Employee();
-    }
+    #endregion
+
+    #region [Full Properties]
 
     private Employee selectedEmployee;
 
@@ -125,39 +140,20 @@ public class MainWindowViewModel : ViewModelBase
     }
 
 
+    #endregion
 
-
-
-    private async void Initialize()
-    {
-        //await _initilize.Value;
-        await LoadEmployees();
-    }
+    #region [Command Handlers]
 
     private async Task LoadEmployees(Employee newEmployee = null)
     {
         IsLoading = true;
         Employees.Clear();
         if (newEmployee != null)
-            Employees.Add(new Employee
-            {
-                id = newEmployee.id,
-                name = newEmployee.name,
-                email = newEmployee.email,
-                gender = newEmployee.gender,
-                status = newEmployee.status,
-            });
+            Employees.Add(Copy(newEmployee));
         var employees = await _employeeManagementService.GetAllAsync($"?page={PageNumber}&per_page=20");
         foreach (var employee in employees)
         {
-            Employees.Add(new Employee
-            {
-                id = employee.id,
-                name = employee.name,
-                email = employee.email,
-                gender = employee.gender,
-                status = employee.status,
-            });
+            Employees.Add(Copy(employee));
         }
         IsLoading = false;
         PageInfo = ChangePageInfo();
@@ -170,35 +166,26 @@ public class MainWindowViewModel : ViewModelBase
         var employees = await _employeeManagementService.GetAllAsync($"?name={searchTerm}");
         foreach (var employee in employees)
         {
-            Employees.Add(new Employee
-            {
-                id = employee.id,
-                name = employee.name,
-                email = employee.email,
-                gender = employee.gender,
-                status = employee.status,
-            });
+            Employees.Add(Copy(employee));
         }
         employees = await _employeeManagementService.GetAllAsync($"?email={searchTerm}");
         foreach (var employee in employees)
         {
-            Employees.Add(new Employee
-            {
-                id = employee.id,
-                name = employee.name,
-                email = employee.email,
-                gender = employee.gender,
-                status = employee.status,
-            });
+            Employees.Add(Copy(employee));
         }
         IsLoading = false;
+        ResetPage();
         PageInfo = ChangePageInfo();
     }
 
     private async Task SaveEmployee()
     {
-        if (SavableEmployee == null || string.IsNullOrEmpty(SavableEmployee.name))
-            MessageBox.Show("No employee selected for saving!", "Warning!", MessageBoxButton.OK, MessageBoxImage.Warning);
+        var validateResult = _employeeValidator.Validate(SavableEmployee);
+        if (!validateResult.Success)
+        {
+            MessageBox.Show(validateResult.Message, "Warning!", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
 
         if ((SavableEmployee?.id ?? 0) == 0)
             await AddEmployee();
@@ -208,7 +195,6 @@ public class MainWindowViewModel : ViewModelBase
 
     private async Task DeleteEmployee()
     {
-        //Employees.Remove(SavableEmployee);
         if (SavableEmployee == null || SavableEmployee.id == 0)
             MessageBox.Show("No employee selected for deletion!", "Warning!", MessageBoxButton.OK, MessageBoxImage.Warning);
 
@@ -238,18 +224,11 @@ public class MainWindowViewModel : ViewModelBase
         {
             MessageBox.Show("Employee created!", "Information!", MessageBoxButton.OK, MessageBoxImage.Information);
             ClearEmployee();
-            Employees.Add(new Employee
-            {
-                id = result.Item1.id,
-                name = result.Item1.name,
-                email = result.Item1.email,
-                gender = result.Item1.gender,
-                status = result.Item1.status
-            });            
+            Employees.Add(Copy(result.Item1));            
         }
             
         else
-            MessageBox.Show(FormatMessage(result.Item2), "Error!", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(MainWindowViewModelHelper.FormatMessage(result.Item2), "Error!", MessageBoxButton.OK, MessageBoxImage.Error);
     }
 
     private async Task UpdateEmployee()
@@ -268,19 +247,12 @@ public class MainWindowViewModel : ViewModelBase
         }
 
         else
-            MessageBox.Show(FormatMessage(result.Item2), "Error!", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(MainWindowViewModelHelper.FormatMessage(result.Item2), "Error!", MessageBoxButton.OK, MessageBoxImage.Error);
     }
 
     private async Task EditEmployee()
     {
-        SavableEmployee = new Employee
-        {
-            id = SelectedEmployee.id,
-            email = SelectedEmployee.email,
-            gender = SelectedEmployee.gender,
-            name = SelectedEmployee.name,
-            status = SelectedEmployee.status
-        };
+        SavableEmployee = Copy(SelectedEmployee);
     }
 
     private async Task GetPreviousPage()
@@ -297,13 +269,31 @@ public class MainWindowViewModel : ViewModelBase
         PageInfo = ChangePageInfo();
     }
 
+    #endregion
+
+    #region [Utilities]
+
+    private Employee Copy(Employee employee)
+    {
+        return new Employee
+        {
+            id = employee.id,
+            name = employee.name,
+            email = employee.email,
+            gender = employee.gender,
+            status = employee.status,
+        };
+    }
+
     private string ChangePageInfo()
     {
         return $"Showing {Employees.Count} records of page #{PageNumber}";
     }
 
-    private string FormatMessage(IEnumerable<ValidationMessage> messages)
+    private void ResetPage()
     {
-        return string.Join(",", messages.Select(i => i.field + ": " + i.message));
+        PageNumber = 1;
     }
+
+    #endregion
 }
