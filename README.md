@@ -5,10 +5,10 @@ Simple Employee management system using WPF .NET 6 framework. It uses MVVM patte
 https://gorest.co.in/ used as a REST API data source. Unit testing added with NUnit and Moq. 
 
 ## Project structure
-* EMS.App: Main WPF form application
-* EMS.Service: REST API communication service
-* EMS.Model: Resides data passing models between view and service.
-* EMS.Test: Unit test project.
+* ***EMS.App***: Main WPF form application
+* ***EMS.Service***: REST API communication service
+* ***EMS.Model***: Resides data passing models between view and service.
+* ***EMS.Test***: Unit test project.
 
 
 ## External Packages/Libaries used:
